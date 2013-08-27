@@ -1,3 +1,6 @@
+# This is a minimal implementation of the CMA-ES based on purecmaes.m
+# The following are the original comments
+#
 # (mu/mu_w, lambda)-CMA-ES
 # CMA-ES: Evolution Strategy with Covariance Matrix Adaptation for
 # nonlinear function minimization. To be used under the terms of the
@@ -78,9 +81,6 @@ function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitne
     # Initialize dynamic (internal) strategy parameters and constants
 
     pc = zeros(N); ps = zeros(N)   # evolution paths for C and sigma
-#    B = eye(N,N)                       # B defines the coordinate system
-#   D = ones(N)                         # diagonal D defines the scaling
-#   D = sigma/max(sigma)
 
     diagD = sigma/max(sigma);      # diagonal matrix D defines the scaling
     diagC = diagD.^2;
@@ -181,29 +181,9 @@ function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitne
     previousFitness = arfitness[1]
 
 
-    #println("fcount: $counteval \t fval: $(arfitness[1])" )
+    #Display some information every 25 iterations
     if(display ==1 && iter % 25 ==0)
         @printf("iter: %d \t fcount: %d \t fval: %2.2e \t axis-ratio: %2.2e \n",iter,counteval, arfitness[1], max(D) / min(D) )
-    end
-    if(display==2 && iter % 2 ==0)
-#        print("\n")
-#        dots = zeros(100)
-#        ind=floor(80*((arfitness-min(arfitness)) /initialValue) )+1
-
-#        ind=ind[find(ind.<100)]
-#        #println(ind)
-#        dots[ind] = 1
-
-#        for i=1:100
-#            if( dots[i] == 1 )
-#                print("%")
-#            else
-#                print(" ")
-#            end
-#        end
-
-        scatterplot([1:length(arfitness)],arfitness)
-
     end
 
     end # while, end generation loop
