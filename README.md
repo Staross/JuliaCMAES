@@ -26,8 +26,7 @@ With the optional arguments:
 - `stopeval` is the maximum number of function evaluation,  by default stopeval = 1e3*N^2
 - `stopDeltaFitness` is the minimum change in the error function before stopping
 
-
-Example on the [Rosenbrock function](rosenbrock):
+Test on the [Rosenbrock function](http://en.wikipedia.org/wiki/Rosenbrock_function):
 
 	rosenbrock(p) = (1-p[1])^2 + 100*(p[2]-p[1]^2)^2
 		
@@ -47,4 +46,42 @@ Example on the [Rosenbrock function](rosenbrock):
 
 	fmin:
 	0.001890875097965983
+	
+	
+Fitting a damped sinus:
+
+	x = 8*rand(100);
+
+	model(x,p) = p[1]*exp(-p[2]*x).*sin(p[3]*2*pi*x + p[4]);
+	
+ 	data = model(x,[2,0.1,0.5,1]) + 0.1*randn(100);
+
+	using ASCIIPlots
+ 	scatterplot(x,data)
+
+		-------------------------------------------------------------
+		|^                                                           | 2.04
+		|^                                                           |
+		| ^             ^                                            |
+		|               ^^                                           |
+		| ^                           ^^                             |
+		|                             ^^              ^              |
+		|  ^          ^   ^          ^   ^           ^^              |
+		|  ^              ^         ^                  ^           ^^|
+		|   ^              ^              ^              ^           |
+		|                  ^        ^              ^     ^        ^  |
+		|                                         ^      ^        ^  |
+		|    ^      ^       ^              ^      ^       ^      ^   |
+		|                   ^      ^       ^               ^    ^^   |
+		|    ^     ^                             ^^                  |
+		|    ^     ^              ^         ^    ^         ^^        |
+		|    ^     ^                         ^ ^             ^^      |
+		|     ^  ^^                          ^^ ^                    |
+		|         ^           ^ ^                                    |
+		|                      ^                                     |
+		|       ^^                                                   | -1.92
+		-------------------------------------------------------------
+		0.20                                                    7.94
+
+
 	
