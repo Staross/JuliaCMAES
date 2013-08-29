@@ -6,3 +6,37 @@ This is a minimal implementation of the Covariance Matrix Adaptation Evolution S
 
 [http://en.wikipedia.org/wiki/CMA-ES](http://en.wikipedia.org/wiki/CMA-ES)
 
+This implementation is based on the original Matlab purecmaes.m:
+
+[https://www.lri.fr/~hansen/cmaes_inmatlab.html](https://www.lri.fr/~hansen/cmaes_inmatlab.html)
+
+>purecmaes.m is a minimalistic implementation running in Matlab and Octave. It is mainly provided for educational purpose: reading, understanding and running basic experiments. It contains roughly 100 lines, with 20 lines reflecting the core implementation of the algorithm. This implementation has only rudimentary termination conditions implemented, under some circumstances it might be numerically inefficient and it should probably not be used for running "real" experiments.
+
+### Usage ###
+
+    cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitness=1e-12)
+
+- objFun is the function to be minimized that map R^N to R
+- pinit is a N-vector containing the initial condition 
+- sigma is a N-vector or a scalar that defines the initial diagonal covariance matrix
+
+
+	rosenbrock(p) = (1-p[1])^2 + 100*(p[2]-p[1]^2)^2
+		
+	pmin=cmaes(rosenbrock,rand(2),ones(2));
+	6-3 CMA-ES
+	iter: 25 	 fcount: 150 	 fval: 6.38e-01 	 axis-ratio: 5.34e+00 
+	...
+	iter: 650 	 fcount: 3900 	 fval: 1.88e-03 	 axis-ratio: 1.32e+01 
+
+	Correlation matrix:
+	2x2 Float64 Array:
+	 1.0      0.89027
+	 0.89027  1.0    
+
+	pmin:
+	[0.9580812985251802,0.9167634979531657]
+
+	fmin:
+	0.001890875097965983
+	

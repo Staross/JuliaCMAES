@@ -18,7 +18,7 @@
 # URL: http://www.lri.fr/~hansen/purecmaes.m
 # References: See end of file. Last change: October, 21, 2010
 
-function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitness=1e-12)
+function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitness=1e-16)
 
 #   objFun(x) = sum( (x-linspace(0,100,length(x))).^2 )
 #   objFun(x) = sum( 0.1*(x[1]-1).^2 + (x[2]-2).^2 )
@@ -35,17 +35,21 @@ function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitne
        error("pinit should be a vector")
     end
 
+    N = length(pinit)
+
     if( max(size([sigma])) == length([sigma]) )
        sigma = vec([sigma])
     else
        error("sigma should be a vector")
     end
 
+    if(length(sigma)==1)
+        sigma = sigma[1]*ones(N)
+    end
+
     if(size(sigma) != size(pinit))
         error("sigma and pinit have different sizes!")
     end
-
-    N = length(pinit)
 
     initialValue = objFun(pinit)
     if(! (typeof(initialValue) <: FloatingPoint) )
