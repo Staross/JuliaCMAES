@@ -20,6 +20,13 @@ This implementation is based on the original Matlab purecmaes.m:
 - `pinit` is a N-vector containing the initial condition 
 - `sigma` is a N-vector or a scalar that defines the initial diagonal covariance matrix
 
+With the optional arguments:
+
+- `lambda` is the population size
+- `stopeval` is the maximum number of function evaluation,  by default stopeval = 1e3*N^2
+- `stopDeltaFitness` is the minimum change in the error function before stopping
+
+
 Example on the [Rosenbrock function](rosenbrock):
 
 	rosenbrock(p) = (1-p[1])^2 + 100*(p[2]-p[1]^2)^2
