@@ -18,7 +18,7 @@
 # URL: http://www.lri.fr/~hansen/purecmaes.m
 # References: See end of file. Last change: October, 21, 2010
 
-function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitness=1e-16)
+function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitness=1e-12)
 
 #   objFun(x) = sum( (x-linspace(0,100,length(x))).^2 )
 #   objFun(x) = sum( 0.1*(x[1]-1).^2 + (x[2]-2).^2 )

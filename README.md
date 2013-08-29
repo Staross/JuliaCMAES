@@ -14,7 +14,7 @@ This implementation is based on the original Matlab purecmaes.m:
 
 ### Usage ###
 
-    cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitness=1e-12)
+    cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitness=1e-12)
 
 - `objFun` is the function to be minimized that map R^N to R
 - `pinit` is a N-vector containing the initial condition 
