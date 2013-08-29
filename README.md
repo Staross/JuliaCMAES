@@ -16,10 +16,11 @@ This implementation is based on the original Matlab purecmaes.m:
 
     cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitness=1e-12)
 
-- objFun is the function to be minimized that map R^N to R
-- pinit is a N-vector containing the initial condition 
-- sigma is a N-vector or a scalar that defines the initial diagonal covariance matrix
+- `objFun` is the function to be minimized that map R^N to R
+- `pinit` is a N-vector containing the initial condition 
+- `sigma` is a N-vector or a scalar that defines the initial diagonal covariance matrix
 
+Example on the [Rosenbrock function](rosenbrock):
 
 	rosenbrock(p) = (1-p[1])^2 + 100*(p[2]-p[1]^2)^2
 		
