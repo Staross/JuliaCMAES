@@ -138,15 +138,14 @@ function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitne
     hsig = norm(ps)/sqrt(1-(1-cs)^(2*counteval))/chiN < 1.4 + 2/(N+1)
     pc = (1-cc)*  pc + hsig* (sqrt(cc*(2-cc)*mueff)/sigma) * (xmean-xold)
 
-
     # Adapt covariance matrix C
     artmp = (1/sigma) * (arx[:,arindex[1:mu]] - repmat(xold,1,mu))  # mu difference vectors
 
-      C =( (1-c1-cmu+(1-hsig)*c1*cc*(2-cc)) * C  # regard old matrix
-          + c1 * pc*pc'        # plus rank one update
-          + cmu                # plus rank mu update
-            * sigma^-2 * (arx[:,arindex[1:mu]]-repmat(xold,1,mu))
-            * (repmat(weights,1,N) .* (arx[:,arindex[1:mu]]-repmat(xold,1,mu))')  )
+      C =( (1-c1-cmu+(1-hsig)*c1*cc*(2-cc)) * C     # regard old matrix
+          + c1 * pc*pc'                             # plus rank one update
+          + cmu                                     # plus rank mu update
+          * sigma^-2 * (arx[:,arindex[1:mu]]-repmat(xold,1,mu))
+          * (repmat(weights,1,N) .* (arx[:,arindex[1:mu]]-repmat(xold,1,mu))')  )
 
 
     # Adapt step size sigma
@@ -157,16 +156,13 @@ function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitne
         eigeneval = counteval
         C = triu(C) + triu(C,1)' # enforce symmetry
         (D,B) = eig(C)           # eigen decomposition, B==normalized eigenvectors
-        #      D = sqrt(D)              # D contains standard deviations now
-        #      invsqrtC = B' * diagm(D.^-1) * B
 
         diagC = diag(C);
         diagD = sqrt(diagD); # D contains standard deviations now
         BD = B.*repmat(diagD',N,1); # O(n^2)
-
     end
 
-
+    #Stop conditions:
     # Break, if fitness is good enough or condition exceeds 1e14, better termination methods are advisable
     if arfitness[1] <= stopfitness || max(D) > 1e7 * min(D)
       break
@@ -179,7 +175,6 @@ function cmaes(objFun::Function, pinit, sigma;lambda=0,stopeval=0,stopDeltaFitne
         end
     end
     previousFitness = arfitness[1]
-
 
     #Display some information every 25 iterations
     if(display ==1 && iter % 25 ==0)
