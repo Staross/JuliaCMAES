@@ -75,10 +75,13 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
 
     #########
     # Strategy parameter setting: Adaptation
-    cc = (4 + mueff/N) / (N+4 + 2*mueff/N) # time constant for cumulation for C
-    cs = (mueff+2) / (N+mueff+5)  # t-const for cumulation for sigma control
-    c1 = 2 / ((N+1.3)^2+mueff)    # learning rate for rank-one update of C
-    cmu = min(1-c1, 2 * (mueff-2+1/mueff) / ((N+2)^2+mueff))  # and for rank-mu update
+
+    cc = 4/(N+4) # time constant for cumulation for C
+    cs = (mueff+2) / (N+mueff+3)  # t-const for cumulation for sigma control
+
+    ccov1 = 2 / ((N+1.3)^2+mueff)    # learning rate for rank-one update of C
+    ccovmu = min(1-ccov1, 2 * (mueff-2+1/mueff) / ((N+2)^2+mueff) )   # and for rank-mu update
+
     damps = 1 + 2*max(0, sqrt((mueff-1)/(N+1))-1) + cs # damping for sigma, usually close to 1
 
     #########
@@ -96,7 +99,6 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
     BD = B.*repmat(diagD',N,1)          # B*D for speed up only
     C = diagm(diagC);                   # covariance matrix == BD*(BD)'
 
-    eigeneval = 0                      # track update of B and D
     chiN=N^0.5*(1-1/(4*N)+1/(21*N^2))  # expectation of  ||N(0,I)|| == norm(randn(N,1))
 
     #init a few things
@@ -139,36 +141,42 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
 
     # Cumulation: Update evolution paths
     ps = (1-cs)*ps + sqrt(cs*(2-cs)*mueff) * (B*zmean)          # Eq. (4)
-    hsig = norm(ps)/sqrt(1-(1-cs)^(2*counteval))/chiN < 1.4 + 2/(N+1)
-    pc = (1-cc)*  pc + hsig* (sqrt(cc*(2-cc)*mueff)/sigma) * (xmean-xold)
+    hsig = norm(ps)/sqrt(1-(1-cs)^(2*iter))/chiN < 1.4 + 2/(N+1)
+    pc = (1-cc)*pc + hsig*(sqrt(cc*(2-cc)*mueff)/sigma) * (xmean-xold)
 
     # Adapt covariance matrix C
-    artmp = (1/sigma) * (arx[:,arindex[1:mu]] - repmat(xold,1,mu))  # mu difference vectors
+    # artmp = (1/sigma) * (arx[:,arindex[1:mu]] - repmat(xold,1,mu))  # mu difference vectors
 
-      C =( (1-c1-cmu+(1-hsig)*c1*cc*(2-cc)) * C     # regard old matrix
-          + c1 * pc*pc'                             # plus rank one update
-          + cmu                                     # plus rank mu update
+    if(ccov1+ccovmu>0)
+
+      C =( (1-ccov1-ccovmu+(1-hsig)*ccov1*cc*(2-cc)) * C     # regard old matrix
+          + ccov1 * pc*pc'                             # plus rank one update
+          + ccovmu                                     # plus rank mu update
           * sigma^-2 * (arx[:,arindex[1:mu]]-repmat(xold,1,mu))
           * (repmat(weights,1,N) .* (arx[:,arindex[1:mu]]-repmat(xold,1,mu))')  )
 
+    end
 
     # Adapt step size sigma
-    sigma = sigma * exp((cs/damps)*(norm(ps)/chiN - 1))
+    sigma = sigma * exp((norm(ps)/chiN - 1)*cs/damps)  #Eq. (5)
 
     # Update B and D from C
-    if counteval - eigeneval > lambda/(c1+cmu)/N/10  # to achieve O(N^2)
-        eigeneval = counteval
+#    if counteval - eigeneval > lambda/(ccov1+ccovmu)/N/10  # to achieve O(N^2)
+    if( mod(iter, 1/(ccov1+ccovmu)/N/10) < 1 && ccov1+ccovmu>0 )
+
         C = triu(C) + triu(C,1)' # enforce symmetry
-        (D,B) = eig(C)           # eigen decomposition, B==normalized eigenvectors
+        (tmp,B) = eig(C)           # eigen decomposition, B==normalized eigenvectors
+
+        diagD = sqrt(tmp); # D contains standard deviations now
 
         diagC = diag(C);
-        diagD = sqrt(diagD); # D contains standard deviations now
+
         BD = B.*repmat(diagD',N,1); # O(n^2)
     end
 
     #Stop conditions:
     # Break, if fitness is good enough or condition exceeds 1e14, better termination methods are advisable
-    if arfitness[1] <= stopfitness || max(D) > 1e7 * min(D)
+    if arfitness[1] <= stopfitness || max(diagD) > 1e7 * min(diagD)
       break
     end
 
@@ -182,7 +190,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
 
     #Display some information every 25 iterations
     if(display ==1 && iter % 25 ==0)
-        @printf("iter: %d \t fcount: %d \t fval: %2.2e \t axis-ratio: %2.2e \n",iter,counteval, arfitness[1], max(D) / min(D) )
+        @printf("iter: %d \t fcount: %d \t fval: %2.2e \t axis-ratio: %2.2e \n",iter,counteval, arfitness[1], max(diagD) / min(diagD) )
     end
 
     end # while, end generation loop

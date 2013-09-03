@@ -30,24 +30,27 @@ Test on the [Rosenbrock function](http://en.wikipedia.org/wiki/Rosenbrock_functi
 
 	rosenbrock(p) = (1-p[1])^2 + 100*(p[2]-p[1]^2)^2
 		
-	pmin=cmaes(rosenbrock,rand(2),ones(2));
+	pmin=cmaes(rosenbrock,-rand(2),ones(2));
 	6-3 CMA-ES
-	iter: 25 	 fcount: 150 	 fval: 6.38e-01 	 axis-ratio: 5.34e+00 
-	...
-	iter: 650 	 fcount: 3900 	 fval: 1.88e-03 	 axis-ratio: 1.32e+01 
+	iter: 25 	 fcount: 150 	 fval: 6.77e-01 	 axis-ratio: 2.90e+00 
+	iter: 50 	 fcount: 300 	 fval: 9.58e-02 	 axis-ratio: 5.90e+00 
+	iter: 75 	 fcount: 450 	 fval: 1.45e-02 	 axis-ratio: 1.14e+01 
+	iter: 100 	 fcount: 600 	 fval: 3.69e-08 	 axis-ratio: 2.22e+01 
 
 	Correlation matrix:
 	2x2 Float64 Array:
-	 1.0      0.89027
-	 0.89027  1.0    
+	 1.0      0.99713
+	 0.99713  1.0    
 
 	pmin:
-	[0.9580812985251802,0.9167634979531657]
+	[1.0000052051864698,1.0000108150577227]
 
 	fmin:
-	0.001890875097965983
-	
-	
+	4.346875072347545e-11
+
+Here the high correlation between p[1] and p[2] indicates that the minimum is in a valley aligned with the direction (1,1).
+
+		
 Fitting a damped sinus:
 
 	x = 8*rand(100);
@@ -55,6 +58,8 @@ Fitting a damped sinus:
 	model(x,p) = p[1]*exp(-p[2]*x).*sin(p[3]*2*pi*x + p[4]);
 	
  	data = model(x,[2,0.1,0.5,1]) + 0.1*randn(100);
+
+	errFun(p) = sum( (data-model(x,p)).^2 )
 
 	using ASCIIPlots
  	scatterplot(x,data)
@@ -84,4 +89,57 @@ Fitting a damped sinus:
 		0.20                                                    7.94
 
 
-	
+		pmin = cmaes(errFun,rand(4),ones(4),lambda=16,stopeval=5000)
+		16-8 CMA-ES
+		iter: 25 	 fcount: 400 	 fval: 8.44e+01 	 axis-ratio: 5.53e+00 
+		iter: 50 	 fcount: 800 	 fval: 3.34e+01 	 axis-ratio: 9.10e+00 
+		iter: 75 	 fcount: 1200 	 fval: 1.30e+00 	 axis-ratio: 3.37e+01 
+		iter: 100 	 fcount: 1600 	 fval: 1.13e+00 	 axis-ratio: 8.09e+01 
+		iter: 125 	 fcount: 2000 	 fval: 1.13e+00 	 axis-ratio: 8.38e+01 
+
+		Correlation matrix:
+		4x4 Float64 Array:
+		  1.0       -0.827892   0.193184  -0.220111
+		 -0.827892   1.0       -0.204811   0.257491
+		  0.193184  -0.204811   1.0       -0.822116
+		 -0.220111   0.257491  -0.822116   1.0     
+
+		pmin:
+		[-1.9586661149601514,0.09269418356545647,0.50064486101525,-2.1538011517772677]
+
+		fmin:
+		1.1264664454434268
+		4-element Float64 Array:
+		 -1.95867  
+		  0.0926942
+		  0.500645 
+		 -2.1538   
+
+		scatterplot(x,model(x,pmin))
+		
+		-------------------------------------------------------------
+		|^                                                           | 1.89
+		|^                                                           |
+		|^^                                                          |
+		| ^           ^                                              |
+		|                             ^^                             |
+		|  ^                         ^  ^            ^^^             |
+		|  ^         ^    ^          ^              ^^               |
+		|  ^              ^                         ^   ^           ^|
+		|           ^      ^                       ^               ^ |
+		|   ^       ^                     ^                       ^  |
+		|                  ^                      ^               ^  |
+		|   ^               ^      ^       ^              ^      ^   |
+		|                                                  ^         |
+		|          ^        ^                              ^    ^^   |
+		|    ^                    ^              ^          ^        |
+		|    ^    ^          ^   ^                            ^^     |
+		|                    ^   ^            ^^             ^       |
+		|     ^                               ^^                     |
+		|     ^               ^^                                     |
+		|      ^^^                                                   | -1.75
+		-------------------------------------------------------------
+		0.24                                                    7.92
+		
+
+Here the algorithm found a true minimum that doesn't correspond to the original parameters, due to the relation sin(x) = -sin(x-pi).
