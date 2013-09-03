@@ -12,6 +12,8 @@ This implementation is based on the original Matlab purecmaes.m:
 
 >purecmaes.m is a minimalistic implementation running in Matlab and Octave. It is mainly provided for educational purpose: reading, understanding and running basic experiments. It contains roughly 100 lines, with 20 lines reflecting the core implementation of the algorithm. This implementation has only rudimentary termination conditions implemented, under some circumstances it might be numerically inefficient and it should probably not be used for running "real" experiments.
 
+However most of core algorithm from cmaes.m is implemented. Features like stopping options, diagonal only covariance matrix and noisy objective function are missing.
+
 ### Usage ###
 
     cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitness=1e-12)
@@ -48,7 +50,7 @@ Test on the [Rosenbrock function](http://en.wikipedia.org/wiki/Rosenbrock_functi
 	fmin:
 	4.346875072347545e-11
 
-Here the high correlation between p[1] and p[2] indicates that the minimum is in a valley aligned with the direction (1,1).
+Here the high correlation between p[1] and p[2] indicates that the minimum (1,1) is located in a narrow valley.
 
 		
 Fitting a damped sinus:
