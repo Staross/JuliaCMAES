@@ -29,7 +29,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
     display = 1
 
     # Input checks
-    if( max(size([pinit])) == length([pinit]) )
+    if( maximum(size([pinit])) == length([pinit]) )
         pinit = vec([pinit])
     else
        error("pinit should be a vector")
@@ -37,7 +37,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
 
     N = length(pinit)
 
-    if( max(size([sigma])) == length([sigma]) )
+    if( maximum(size([sigma])) == length([sigma]) )
        sigma = vec([sigma])
     else
        error("sigma should be a vector")
@@ -68,7 +68,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
         lambda = convert(Integer,4+floor(3*log(N)))  # population size, offspring number
     end
     mu = lambda/2                   # number of parents/points for recombination
-    weights = log(mu+1/2)-log(1:mu) # muXone array for weighted recombination
+    weights = log(mu+1/2).-log(1:mu) # muXone array for weighted recombination
     mu = convert(Integer,floor(mu))
     weights = weights/sum(weights)     # normalize recombination weights array
     mueff=sum(weights)^2/sum(weights.^2) # variance-effectiveness of sum w_i x_i
@@ -76,23 +76,23 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
     #########
     # Strategy parameter setting: Adaptation
 
-    cc = 4/(N+4) # time constant for cumulation for C
-    cs = (mueff+2) / (N+mueff+3)  # t-const for cumulation for sigma control
+    cc = 4.0/(N+4.0) # time constant for cumulation for C
+    cs = (mueff+2.0) / (N+mueff+3.0)  # t-const for cumulation for sigma control
 
-    ccov1 = 2 / ((N+1.3)^2+mueff)    # learning rate for rank-one update of C
+    ccov1 = 2.0 / ((N+1.3)^2+mueff)    # learning rate for rank-one update of C
     ccovmu = min(1-ccov1, 2 * (mueff-2+1/mueff) / ((N+2)^2+mueff) )   # and for rank-mu update
 
-    damps = 1 + 2*max(0, sqrt((mueff-1)/(N+1))-1) + cs # damping for sigma, usually close to 1
+    damps = 1.0 + 2.0*max(0.0, sqrt((mueff-1)/(N+1))-1) + cs # damping for sigma, usually close to 1
 
     #########
     # Initialize dynamic (internal) strategy parameters and constants
 
     pc = zeros(N); ps = zeros(N)   # evolution paths for C and sigma
 
-    diagD = sigma/max(sigma);      # diagonal matrix D defines the scaling
+    diagD = sigma/maximum(sigma);      # diagonal matrix D defines the scaling
     diagC = diagD.^2;
 
-    sigma = max(sigma)
+    sigma = maximum(sigma)
 
     B = eye(N,N)                        # B defines the coordinate system
 
@@ -137,7 +137,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
     # Calculate new xmean, this is selection and recombination
     xold = xmean; # for speed up of Eq. (2) and (3)
     xmean = arx[:,arindex[1:mu]]*weights
-    zmean = arz[:,arindex[1:mu]]*weights #==D^-1*B'*(xmean-xold)/sigma
+    zmean = arz[:,arindex[1:mu]]*weights # ==D^-1*B'*(xmean-xold)/sigma
 
     # Cumulation: Update evolution paths
     ps = (1-cs)*ps + sqrt(cs*(2-cs)*mueff) * (B*zmean)          # Eq. (4)
@@ -176,7 +176,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
 
     #Stop conditions:
     # Break, if fitness is good enough or condition exceeds 1e14, better termination methods are advisable
-    if arfitness[1] <= stopfitness || max(diagD) > 1e7 * min(diagD)
+    if arfitness[1] <= stopfitness || maximum(diagD) > 1e7 * minimum(diagD)
       break
     end
 
@@ -190,7 +190,7 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
 
     #Display some information every 25 iterations
     if(display ==1 && iter % 25 ==0)
-        @printf("iter: %d \t fcount: %d \t fval: %2.2e \t axis-ratio: %2.2e \n",iter,counteval, arfitness[1], max(diagD) / min(diagD) )
+        @printf("iter: %d \t fcount: %d \t fval: %2.2e \t axis-ratio: %2.2e \n",iter,counteval, arfitness[1], maximum(diagD) / minimum(diagD) )
     end
 
     end # while, end generation loop
