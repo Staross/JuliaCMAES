@@ -161,11 +161,11 @@ function cmaes(objFun::Function, pinit, sigma; lambda=0,stopeval=0,stopDeltaFitn
     sigma = sigma * exp((norm(ps)/chiN - 1)*cs/damps)  #Eq. (5)
 
     # Update B and D from C
-#    if counteval - eigeneval > lambda/(ccov1+ccovmu)/N/10  # to achieve O(N^2)
+    # if counteval - eigeneval > lambda/(ccov1+ccovmu)/N/10  # to achieve O(N^2)
     if( mod(iter, 1/(ccov1+ccovmu)/N/10) < 1 && ccov1+ccovmu>0 )
 
-        C = triu(C) + triu(C,1)' # enforce symmetry
-        (tmp,B) = eig(C)           # eigen decomposition, B==normalized eigenvectors
+        C = triu(C) + triu(C,1)'    # enforce symmetry
+        (tmp,B) = eig(C)            # eigen decomposition, B==normalized eigenvectors
 
         diagD = sqrt(tmp); # D contains standard deviations now
 
